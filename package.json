@@ -1,0 +1,25 @@
+{
+  "name": "batta-backend",
+  "version": "1.0.0",
+  "description": "Enchere",
+  "main": "index.js",
+  "scripts": {
+    "test": "batta-backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdou123touil/BATTA-Backend.git"
+  },
+  "keywords": [
+    "Asusthgu.1"
+  ],
+  "author": "abdou123touil",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/abdou123touil/BATTA-Backend/issues"
+  },
+  "homepage": "https://github.com/abdou123touil/BATTA-Backend#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
