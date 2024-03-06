@@ -1,4 +1,4 @@
-after cloning this repo run **npm i** 
+**after cloning this repo run **npm i** 
 under backend you need to add **.env** file that contains this configuration:
 ```
 API_URL = /api/v1
