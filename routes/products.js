@@ -45,13 +45,12 @@ router.get(`/`, async (req, res) => {
     if (req.query.categories){
         filter ={category : req.query.categories.split(',') }
     }
-    
+    console.log(filter)
     const  productList = await Product.find(filter).populate('category'); //.select('name image -_id');
     if (!productList){
-         return res.status(404).json({"success":false , message :'no product within this category is found '})
+        res.status(404).json({"success":false , message :'no product within this category is found '}); 
     }
-       res.send(productList);
-       
+    res.send(productList);
   }catch (error) {
     console.error("Error:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
@@ -60,7 +59,7 @@ router.get(`/`, async (req, res) => {
 router.get(`/:id`, async (req, res) => {
     const product = await Product.findById(req.params.id).populate('category');//.select('name image -_id');
     if (!product){
-      res.status(500).json({"success":false});
+        res.status(500).json({"success":false});
     }
     res.send(product);
 })
