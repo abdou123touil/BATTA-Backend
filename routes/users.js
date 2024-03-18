@@ -188,18 +188,68 @@ router.delete('/:id',  (req , res) => {
         res.send({ count: userCount });
     
 });
+router.post('/forgot-password', async (req, res) => {
+try {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  // Generate reset token
+  const resetToken = jwt.sign({ userId: user.id }, process.env.RESET_SECRET, {
+    expiresIn: "1h",
+  });
+
+  // Send reset password link to user's email
+  const resetLink =` http://localhost:3000/api/v1/users/reset-password?token=${resetToken}`;
+  console.log(resetLink)
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: "Password Reset",
+    html: `Click <a href="${resetLink}">here</a> to reset your password.`,
+  });
+
+  res.status(200).json({ success: true, message: "Password reset link sent to your email." });
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ success: false, message: "Something went wrong" });
+}
+});
 
 
-  
+// Route for resetting password using reset token
+router.post("/reset-password", async (req, res) => {
 
+  try {
+    let token = req.query.token; // Extract token from query parameters
+    if (!token) {
+      token = req.body.token; // If not found in query parameters, try to extract from the request body
+    }
 
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Token not provided" });
+    }
+    const { newPassword}  = req.body;
+    const decoded = jwt.verify(token, process.env.RESET_SECRET);
+    const userId = decoded.userId;
+    const user = await User.findById(userId);
 
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
+    // Update user's password
+    user.passwordHash = bcrypt.hashSync(newPassword, 10);
+    await user.save();
 
-
-
-
-
-
+    res.status(200).json({ success: true, message: "Password reseted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ success: false, message: "Invalid or expired token." });
+  }
+});
 
 module.exports = router;

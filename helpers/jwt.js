@@ -15,6 +15,8 @@ function authJwt() {
       `${api}/users/login`,
       `${api}/users/register`,
       `${api}/users/verify-email`,
+      `${api}/users/reset-password`,
+      `${api}/users/forgot-password`,
     ],
   });
 }
