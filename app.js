@@ -2,12 +2,17 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 require('dotenv/config');
 const authJwt = require('./helpers/jwt');
 
 const api= process.env.API_URL;
-
+app.use(cors({
+    origin: 'http://localhost:4200',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 //Routes
 const productsRouter = require('./routes/products');
 const categoriesRouter = require('./routes/categories');
@@ -42,8 +47,9 @@ mongoose.connect('mongodb://localhost:27017/eshop')
     console.log(err);
 })
 
+require('dotenv').config();
 
-
+const secret = process.env.SECRET;
 
 
 app.listen(3000, () => {

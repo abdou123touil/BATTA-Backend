@@ -8,7 +8,7 @@ const nodemailer = require("nodemailer");
 router.get("/verify-email", async (req, res) => {
   const token = req.query.token;
   console.log(token);
-  
+
 
   try {
     const decoded = jwt.verify(token, process.env.SECRET);
@@ -18,14 +18,14 @@ router.get("/verify-email", async (req, res) => {
     if (user.isVerified) {
       return res.status(400).send("Email already verified.");
     }
-    
+
     // Mark user's email as verified
     await User.findByIdAndUpdate(userId, { isVerified: true });
   res.send("Email verified successfully. you can now close this page and log in ")
 
- 
+
   } catch (error) {
-    
+
       return res.status(400).send("Invalid or expired token.");
   }
 });
@@ -50,9 +50,11 @@ router.post("/", async (req, res) => {
   let user = new User({
     name: req.body.name,
     lastName: req.body.lastName,
+    userName:req.body.userName,
     email: req.body.email,
     passwordHash: bcrypt.hashSync(req.body.password, 10), //the "10" is a salt of bcrypt
     phone: req.body.phone,
+    dateofbirth:req.body.dateofbirth,
     role: req.body.role,
   });
   user = await user.save();
@@ -80,9 +82,11 @@ router.post("/register", async (req, res) => {
     const user = new User({
     name: req.body.name,
     lastName: req.body.lastName,
+    userName:req.body.userName,
     email: req.body.email,
     passwordHash: bcrypt.hashSync(req.body.password, 10), //the "10" is a salt of bcrypt
     phone: req.body.phone,
+    dateofbirth:req.body.dateofbirth,
     role: req.body.role,
     isVerified: false,
   })
@@ -119,9 +123,11 @@ router.put("/:id", async (req, res) => {
     {
       name: req.body.name,
       lastName: req.body.lastName,
+      userName: req.body.userName,
       email: req.body.email,
       passwordHash: bcrypt.hashSync(req.body.password, 10), //the "10" is a salt of bcrypt
       phone: req.body.phone,
+      dateofbirth:req.body.dateofbirth,
       isAdmin: req.body.isAdmin,
     },
     { new: true }
@@ -137,7 +143,7 @@ router.put("/:id", async (req, res) => {
 
 
 
-//Auth 
+//Auth
 router.post('/login', async (req, res) => {
 const user = await User.findOne({email: req.body.email})
 const secret = process.env.secret
@@ -150,7 +156,7 @@ if (!user.isVerified) {
     const token = jwt.sign({
        userId: user.id,
        role:user.role
-       
+
     },
     secret,
     {expiresIn:'1d'})
