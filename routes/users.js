@@ -150,7 +150,11 @@ const secret = process.env.secret
 if (!user) {
   return res.status(404).send('User not found')}
 if (!user.isVerified) {
-  return res.status(403).send('Email not verified. Please verify your email before logging in.')}
+  return res.status(200).send( {isVerified: false});
+}
+else{
+  return res.status(200).json({ isVerified: true });
+}
 
   if(user&& bcrypt.compareSync(req.body.password, user.passwordHash)){
     const token = jwt.sign({
@@ -165,7 +169,21 @@ if (!user.isVerified) {
     res.status(400).send('Invalid email or password')
   }
 } )
+router.post('/verify', async (req, res) => {
+  try {
+    const user = await User.findOne({email: req.body.email})
+    if (!user) {
+      return res.status(404).send('User not found')}
+    if (!user.isVerified) {
+      return res.status(403).send('Email not verified. Please verify your email before logging in.')}
+    else {
+      return res.status(200).send('Email verified')
+    }
 
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur interne du serveur' });
+  }
+});
   
 router.delete('/:id',  (req , res) => {
   User.findByIdAndDelete(req.params.id).then(user => { if (user){
@@ -251,5 +269,6 @@ router.post("/reset-password", async (req, res) => {
     res.status(400).json({ success: false, message: "Invalid or expired token." });
   }
 });
+
 
 module.exports = router;
