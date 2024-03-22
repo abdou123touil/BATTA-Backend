@@ -153,22 +153,23 @@ if (!user.isVerified) {
   return res.status(200).send( {isVerified: false});
 }
 else{
-  return res.status(200).json({ isVerified: true });
-}
-
+  //return res.status(200).json({ isVerified: true });
   if(user&& bcrypt.compareSync(req.body.password, user.passwordHash)){
     const token = jwt.sign({
-       userId: user.id,
-       role:user.role
+          userId: user.id,
+          role:user.role
 
-    },
-    secret,
-    {expiresIn:'1d'})
-    res.status(200).send({user : user.email , token : token})
+        },
+        secret,
+        {expiresIn:'1d'})
+    res.status(200).send({user : user.email , userName : user.userName , token : token ,isVerified: true})
   }else{
     res.status(400).send('Invalid email or password')
   }
-} )
+}
+}
+
+   )
 router.post('/verify', async (req, res) => {
   try {
     const user = await User.findOne({email: req.body.email})
