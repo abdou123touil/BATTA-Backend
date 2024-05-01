@@ -8,7 +8,11 @@ const multer = require('multer');
 const FILE_TYPE_MAP = {
     'image/png': 'png',
     'image/jpeg': 'jpeg',
-    'image/jpg': 'jpg'
+    'image/jpg': 'jpg',
+
+    'images/png': 'png',
+    'images/jpeg': 'jpeg',
+    'images/jpg': 'jpg'
 }
 
 //file upload 
@@ -63,39 +67,61 @@ router.get(`/:id`, async (req, res) => {
     }
     res.send(product);
 })
-router.post(`/`, uploadOptions.single('image'), async (req, res) => {
-  // Trying a wrong category id will work only if the id contain 24 characters(as its in the DB)
-   const category = await Category.findById(req.body.category);
-   if(!category) return res.status(400).send('Invalid category')
-   
-   //file upload
-   const file = req.file;
-   if (!file) return res.status(400).send('No image in the request')
+router.post('/add_new_product', uploadOptions.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'images', maxCount: 5 }
+]), async (req, res) => {
+    try {
+        // Validate category ID
+        const category = await Category.findById(req.body.category);
+        if (!category) {
+            return res.status(400).send('Invalid category');
+        }
 
-  
- const filename = req.file.filename;
- const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`
-  
+        // Handle single image upload
+        const image = req.files['image'];
+        if (!image || image.length === 0) {
+            return res.status(400).send('No image uploaded');
+        }
+        const imagePath = `${req.protocol}://${req.get('host')}/public/uploads/${image[0].filename}`;
 
-    let product = new Product({
-       
-       name : req.body.name,
-       description : req.body.description,
-       quantity : req.body.quantity,
-       image : `${basePath}${filename}`, //"http://localhost:3000/public/uploads/image-232323"
-       images : req.body.images,
-       brand : req.body.brand,
-       price : req.body.price,
-       timing : req.body.timing,
-       category : req.body.category,
-       isFeatured : req.body.isFeatured
-    })
-      product = await product.save();
-    
-    if (!product)
-        return res.status(500).send('product cannot be created');
-     res.send(product);  
-})
+        // Handle multiple images upload
+        const images = req.files['images'];
+        const imagesPaths = [];
+        if (images) {
+            images.forEach(file => {
+                imagesPaths.push(`${req.protocol}://${req.get('host')}/public/uploads/${file.filename}`);
+            });
+        }
+
+        // Create new product instance
+        const product = new Product({
+            name: req.body.name,
+            description: req.body.description,
+            quantity: req.body.quantity,
+            image: imagePath,
+            images: imagesPaths,
+            brand: req.body.brand,
+            oldPrice: req.body.oldPrice,
+            newPrice: req.body.newPrice,
+            timing: req.body.timing,
+            category: req.body.category,
+            isFeatured: req.body.isFeatured
+        });
+
+        // Save the product to database
+        const savedProduct = await product.save();
+
+        if (!savedProduct) {
+            return res.status(500).send('Product cannot be created');
+        }
+
+        res.send(savedProduct);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
 
 
 
@@ -116,7 +142,8 @@ router.put('/:id', async (req, res) => {
        image : req.body.image,
        images : req.body.images,
        brand : req.body.brand,
-       price : req.body.price,
+       oldPrice : req.body.oldPrice,
+       newPrice : req.body.newPrice,
        timing : req.body.timing,
        category : req.body.category,
        isFeatured : req.body.isFeatured 

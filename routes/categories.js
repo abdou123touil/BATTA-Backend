@@ -28,7 +28,7 @@ router.get('/:id', async (req, res) => {
 
 
 
-router.post("/", async (req, res) => {
+router.post("/add_new_cat", async (req, res) => {
   let category = new Category({
     name: req.body.name,
     icon: req.body.icon,

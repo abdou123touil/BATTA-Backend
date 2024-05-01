@@ -15,11 +15,14 @@ const productSchema = mongoose.Schema({
             required: false}],
         brand: {type :String,
                 required: false},
-            price: {
+            oldPrice: {
         type :Number, 
         required: true},
+    newPrice: {
+        type :Number,
+        required: true},
 
-            quantity: {
+    quantity: {
         type :Number, 
         required: true},
             timing: {
