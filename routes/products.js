@@ -67,6 +67,15 @@ router.get(`/:id`, async (req, res) => {
     }
     res.send(product);
 })
+router.get(`/get/featured`, async (req, res) => {
+    try {
+        const products = await Product.find({ isFeatured: true });
+        res.send(products);
+    } catch (error) {
+        console.error("Error fetching featured products:", error);
+        res.status(500).json({ success: false, error: "Internal server error" });
+    }
+});
 router.post('/add_new_product', uploadOptions.fields([
     { name: 'image', maxCount: 1 },
     { name: 'images', maxCount: 5 }
@@ -98,7 +107,7 @@ router.post('/add_new_product', uploadOptions.fields([
         const product = new Product({
             name: req.body.name,
             description: req.body.description,
-            quantity: req.body.quantity,
+            tot_quantity: req.body.tot_quantity,
             image: imagePath,
             images: imagesPaths,
             brand: req.body.brand,
@@ -138,7 +147,7 @@ router.put('/:id', async (req, res) => {
         id : req.body.id,
        name : req.body.name,
        description : req.body.description,
-       quantity : req.body.quantity,
+       tot_quantity : req.body.tot_quantity,
        image : req.body.image,
        images : req.body.images,
        brand : req.body.brand,

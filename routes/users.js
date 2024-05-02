@@ -208,34 +208,31 @@ router.delete('/:id',  (req , res) => {
     
 });
 router.post('/forgot-password', async (req, res) => {
-try {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
 
-  if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign({ userId: user.id }, process.env.RESET_SECRET, { expiresIn: "1h" });
+
+    // Send reset password link to user's email
+    const resetLink = `http://localhost:4200/reset-password?token=${resetToken}`;
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Password Reset",
+      html: `Click <a href="${resetLink}">here</a> to reset your password.`,
+    });
+
+    res.status(200).json({ success: true, message: "Password reset link sent to your email." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Something went wrong" });
   }
-
-  // Generate reset token
-  const resetToken = jwt.sign({ userId: user.id }, process.env.RESET_SECRET, {
-    expiresIn: "1h",
-  });
-
-  // Send reset password link to user's email
-  const resetLink =` http://localhost:3000/api/v1/users/reset-password?token=${resetToken}`;
-  console.log(resetLink)
-  await transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: user.email,
-    subject: "Password Reset",
-    html: `Click <a href="${resetLink}">here</a> to reset your password.`,
-  });
-
-  res.status(200).json({ success: true, message: "Password reset link sent to your email." });
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ success: false, message: "Something went wrong" });
-}
 });
 
 

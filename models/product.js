@@ -22,7 +22,7 @@ const productSchema = mongoose.Schema({
         type :Number,
         required: true},
 
-    quantity: {
+    tot_quantity: {
         type :Number, 
         required: true},
             timing: {
