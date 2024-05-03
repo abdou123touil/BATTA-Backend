@@ -55,7 +55,14 @@ router.get("/verify-email", async (req, res) => {
 
     // Mark user's email as verified
     await User.findByIdAndUpdate(userId, { isVerified: true });
-  res.send("Email verified successfully. you can now close this page and log in ")
+    const homelink =` http://localhost:4200/home`;
+    console.log(homelink)
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Email verified",
+      html: `Click <a href="${homelink}">here</a> verifiy you email.`,
+    });
 
 
   } catch (error) {
@@ -256,7 +263,7 @@ try {
   });
 
   // Send reset password link to user's email
-  const resetLink =` http://localhost:3000/api/v1/users/reset-password?token=${resetToken}`;
+  const resetLink =` http://localhost:4200/reset_pass?token=${resetToken}`;
   console.log(resetLink)
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
